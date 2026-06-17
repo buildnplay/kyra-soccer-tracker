@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Kyra's Soccer Tracker</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #ffffff; --bg2: #f5f5f4; --bg3: #eeede8;
+    --text: #1a1a1a; --text2: #6b6b6b; --text3: #aaa;
+    --border: rgba(0,0,0,0.12); --border2: rgba(0,0,0,0.22);
+    --green: #1D9E75; --green-bg: #E1F5EE; --green-text: #085041;
+    --blue-bg: #E6F1FB; --blue-text: #0C447C;
+    --amber-bg: #FAEEDA; --amber-text: #633806;
+    --red: #E24B4A; --radius: 8px; --radius-lg: 12px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1c1c1c; --bg2: #252525; --bg3: #2e2e2e;
+      --text: #f0f0f0; --text2: #a0a0a0; --text3: #666;
+      --border: rgba(255,255,255,0.12); --border2: rgba(255,255,255,0.22);
+      --green-bg: #0a2e22; --green-text: #9FE1CB;
+      --blue-bg: #0a1e36; --blue-text: #85B7EB;
+      --amber-bg: #2a1e08; --amber-text: #FAC775;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg3); color: var(--text); min-height: 100vh; }
+  .app { max-width: 480px; margin: 0 auto; background: var(--bg); min-height: 100vh; padding-bottom: 2rem; }
+  .screen { display: none; padding: 1.25rem 1rem 2rem; }
+  .screen.active { display: block; }
+  .page-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .page-sub { font-size: 14px; color: var(--text2); margin-bottom: 1.5rem; }
+  .game-badge { display: inline-block; background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 4px 12px; font-size: 13px; color: var(--text2); margin-bottom: 1.5rem; }
+  .cat-label { font-size: 11px; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.07em; margin: 1.25rem 0 0.5rem; }
+  .action-btn { display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 13px 14px; background: var(--bg); border: 0.5px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 8px; cursor: pointer; transition: background 0.1s, border-color 0.25s; -webkit-tap-highlight-color: transparent; }
+  .action-btn:active { transform: scale(0.98); background: var(--bg2); }
+  .action-btn.flashed { border-color: var(--green); }
+  .a-left { display: flex; align-items: center; gap: 10px; text-align: left; }
+  .a-icon { font-size: 20px; color: var(--text2); flex-shrink: 0; }
+  .a-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .a-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .a-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+  .pts-badge { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 20px; }
+  .p1 { background: var(--blue-bg); color: var(--blue-text); }
+  .p2 { background: var(--green-bg); color: var(--green-text); }
+  .p5 { background: var(--amber-bg); color: var(--amber-text); }
+  .count-pill { min-width: 30px; height: 30px; border-radius: 20px; background: var(--bg2); border: 0.5px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 15px; font-weight: 600; color: var(--text); transition: background 0.15s, color 0.15s; }
+  .count-pill.lit { background: var(--green); border-color: var(--green); color: #fff; }
+  .score-bar { display: flex; justify-content: space-between; align-items: center; border-top: 0.5px solid var(--border); padding: 14px 1rem; margin: 1.5rem -1rem -2rem; background: var(--bg); position: sticky; bottom: 0; }
+  .score-total { font-size: 24px; font-weight: 700; color: var(--text); }
+  .score-lbl { font-size: 11px; color: var(--text2); }
+  .end-btn { padding: 10px 22px; border-radius: var(--radius); background: var(--green); border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; }
+  .end-btn:active { transform: scale(0.97); }
+  .primary-btn { width: 100%; padding: 14px; border-radius: var(--radius-lg); background: var(--green); border: none; color: #fff; font-size: 15px; font-weight: 600; cursor: pointer; margin-top: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
+  .primary-btn:active { transform: scale(0.98); }
+  .primary-btn:disabled { background: var(--bg2); color: var(--text3); cursor: not-allowed; transform: none; }
+  .secondary-btn { width: 100%; padding: 13px; border-radius: var(--radius-lg); background: var(--bg2); border: 0.5px solid var(--border); color: var(--text2); font-size: 14px; font-weight: 500; cursor: pointer; margin-top: 8px; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-tap-highlight-color: transparent; }
+  .secondary-btn:active { transform: scale(0.98); }
+  .back-link { font-size: 14px; color: #185FA5; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; margin-bottom: 1.25rem; padding: 4px 0; }
+  .summary-card { background: var(--bg2); border-radius: var(--radius-lg); border: 0.5px solid var(--border); padding: 1rem 1.25rem; margin-bottom: 1rem; }
+  .sum-row { display: flex; justify-content: space-between; align-items: center; padding: 7px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .sum-row:last-child { border-bottom: none; }
+  .sum-row .lbl { color: var(--text2); }
+  .sum-row .val { font-weight: 600; color: var(--text); }
+  .big-score { text-align: center; padding: 1.25rem 0; }
+  .big-score .num { font-size: 56px; font-weight: 700; color: var(--text); line-height: 1; }
+  .big-score .lbl { font-size: 13px; color: var(--text2); margin-top: 4px; }
+  .status-msg { font-size: 13px; color: var(--text2); text-align: center; margin-top: 10px; min-height: 20px; line-height: 1.5; }
+  .status-msg.ok { color: var(--green); }
+  .status-msg.err { color: var(--red); }
+  .season-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; margin-bottom: 1.25rem; }
+  .s-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: var(--radius-lg); padding: 12px 14px; }
+  .s-card .sn { font-size: 26px; font-weight: 700; color: var(--text); }
+  .s-card .sl { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .m-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .m-row:last-child { border-bottom: none; }
+  .m-name { flex: 1; color: var(--text); }
+  .m-reward { font-size: 11px; color: var(--text3); }
+  .m-prog { color: var(--text2); font-size: 13px; }
+  .m-done { color: var(--green); font-weight: 600; font-size: 13px; }
+  .gh-item { display: flex; justify-content: space-between; align-items: center; padding: 11px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .gh-item:last-child { border-bottom: none; }
+  .banner { background: var(--green-bg); border: 0.5px solid #9FE1CB; border-radius: var(--radius); padding: 10px 14px; font-size: 13px; color: var(--green-text); margin-bottom: 1.25rem; display: flex; align-items: flex-start; gap: 8px; line-height: 1.5; }
+  .no-sheets-note { background: var(--bg2); border-radius: var(--radius); padding: 10px 14px; font-size: 12px; color: var(--text3); margin-top: 8px; line-height: 1.6; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div id="screen-setup" class="screen active">
+    <p class="page-title">Setup</p>
+    <p class="page-sub">Connect Google Sheets to auto-sync after each game, or skip and set it up later.</p>
+    <div style="background:var(--green-bg);border:0.5px solid #9FE1CB;border-radius:var(--radius);padding:10px 14px;font-size:13px;color:var(--green-text);margin-bottom:1.25rem;line-height:1.5;">
+      <i class="ti ti-circle-check"></i> Your Google Apps Script webhook is already built in. You can skip setup and start tracking right away.
+    </div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:1rem;">Stats will sync to your Google Sheet automatically after each game.</p>
+    <button class="primary-btn" onclick="skipSetup()"><i class="ti ti-player-play"></i> Start tracking</button>
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:0.5px solid var(--border);">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:0.75rem;">Advanced: override the webhook URL</p>
+      <div style="margin-bottom:0.75rem;">
+        <label style="display:block;font-size:13px;color:var(--text2);margin-bottom:6px;font-weight:500;">Apps Script webhook URL</label>
+        <input id="webhook-url" type="text" style="width:100%;padding:11px 13px;border-radius:var(--radius);border:0.5px solid var(--border2);background:var(--bg);font-size:13px;color:var(--text);" placeholder="https://script.google.com/macros/s/..." autocomplete="off" autocorrect="off" autocapitalize="off" />
+      </div>
+      <button class="secondary-btn" onclick="saveSetup()"><i class="ti ti-device-floppy"></i> Save custom URL</button>
+      <p id="setup-msg" class="status-msg"></p>
+    </div>
+  </div>
+
+  <div id="screen-home" class="screen">
+    <p class="page-title">Kyra's tracker</p>
+    <p class="page-sub" id="home-sub">10 games remaining</p>
+    <div class="season-grid" id="season-stats"></div>
+    <p class="cat-label">Milestone progress</p>
+    <div class="summary-card" id="milestone-list"></div>
+    <p class="cat-label" style="margin-top:1.25rem;">Game history</p>
+    <div id="game-history"></div>
+    <button class="primary-btn" onclick="startGame()"><i class="ti ti-player-play"></i> Start game <span id="next-game-num"></span></button>
+    <button class="secondary-btn" onclick="goSetup()"><i class="ti ti-settings"></i> Settings</button>
+  </div>
+
+  <div id="screen-game" class="screen">
+    <span class="back-link" onclick="confirmBack()"><i class="ti ti-arrow-left"></i> Back</span>
+    <p class="page-title">Live tracking</p>
+    <span class="game-badge" id="game-badge">Game 1 of 10</span>
+    <p class="cat-label">The brain</p>
+    <div id="btns-brain"></div>
+    <p class="cat-label">The engine</p>
+    <div id="btns-engine"></div>
+    <p class="cat-label">First to ball</p>
+    <div id="btns-first"></div>
+    <p class="cat-label">The x-factor</p>
+    <div id="btns-xfactor"></div>
+    <div class="score-bar">
+      <div>
+        <div class="score-total" id="live-score">0 pts</div>
+        <div class="score-lbl">this game</div>
+      </div>
+      <button class="end-btn" onclick="endGame()">End game</button>
+    </div>
+  </div>
+
+  <div id="screen-summary" class="screen">
+    <p class="page-title">Game summary</p>
+    <span class="game-badge" id="summary-badge">Game 1</span>
+    <div class="big-score">
+      <div class="num" id="sum-pts">0</div>
+      <div class="lbl">points earned</div>
+    </div>
+    <div class="summary-card" id="sum-breakdown"></div>
+    <p class="cat-label">Season milestones</p>
+    <div class="summary-card" id="sum-milestones"></div>
+    <button class="primary-btn" id="sync-btn" onclick="syncToSheets()"><i class="ti ti-table-export"></i> Sync to Google Sheets</button>
+    <p id="sync-msg" class="status-msg"></p>
+    <button class="secondary-btn" onclick="showHome()"><i class="ti ti-home"></i> Back to home</button>
+  </div>
+
+</div>
+<script>
+const DEFAULT_WEBHOOK = 'https://script.google.com/macros/s/AKfycbz0JI0AYavPUqA73XNu2T3msk8XohIafaUVVQUBgDmAu4dKisUSKkH9Vbvfb5s4dp7oDw/exec';
+
+const ACTIONS = [
+  {id:'scan_play', name:'Scan & play', sub:'Shoulder check + good next move', pts:1, cat:'brain', icon:'ti-brain'},
+  {id:'switch', name:'Switch of play', sub:'Receive one side, play opposite', pts:2, cat:'brain', icon:'ti-arrows-left-right'},
+  {id:'prog_pass', name:'Progressive pass', sub:'Breaks line or moves team forward', pts:1, cat:'engine', icon:'ti-arrow-up-right'},
+  {id:'box_delivery', name:'Box delivery', sub:'Cross, cutback, or pass into box', pts:2, cat:'engine', icon:'ti-target-arrow'},
+  {id:'interception', name:'Interception', sub:'Read lane + steal before winger touches', pts:2, cat:'first', icon:'ti-hand-stop'},
+  {id:'shutdown', name:'1v1 shutdown', sub:'Patient jockey + win the ball', pts:2, cat:'first', icon:'ti-shield'},
+  {id:'strike', name:'Confident strike', sub:'Shot on goal when space opens', pts:2, cat:'xfactor', icon:'ti-ball-football'},
+  {id:'contribution', name:'Direct contribution', sub:'Goal or assist', pts:5, cat:'xfactor', icon:'ti-star'},
+];
+const MILESTONES = [
+  {id:'interceptor', name:'The Interceptor', reward:'$10', actions:['interception'], target:8},
+  {id:'catalyst', name:'Creation Catalyst', reward:'$10', actions:['contribution','box_delivery'], target:6},
+  {id:'general', name:'Field General', reward:'$10', actions:['switch'], target:10},
+  {id:'century', name:'Century Club', reward:'$50 + Kinjo', actions:null, target:100, isPoints:true},
+];
+
+let state = {gameLogs:[], currentCounts:{}};
+function loadState(){try{const s=localStorage.getItem('kyra_v2');if(s)state=JSON.parse(s);}catch(e){}}
+function saveState(){localStorage.setItem('kyra_v2',JSON.stringify(state));}
+function getWebhook(){return localStorage.getItem('kyra_webhook')||DEFAULT_WEBHOOK;}
+function show(name){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+name).classList.add('active');window.scrollTo(0,0);}
+
+function saveSetup(){
+  const url=document.getElementById('webhook-url').value.trim();
+  if(url){localStorage.setItem('kyra_webhook',url);}
+  const m=document.getElementById('setup-msg');
+  m.textContent='Saved!';m.className='status-msg ok';
+  setTimeout(()=>showHome(),800);
+}
+function skipSetup(){showHome();}
+function goSetup(){document.getElementById('webhook-url').value=localStorage.getItem('kyra_webhook')||'';document.getElementById('setup-msg').textContent='';show('setup');}
+
+function seasonTotals(){let pts=0,counts={};ACTIONS.forEach(a=>counts[a.id]=0);state.gameLogs.forEach(g=>{pts+=g.points;ACTIONS.forEach(a=>{counts[a.id]+=(g.counts[a.id]||0);});});return{pts,counts};}
+function milestoneProgress(){const t=seasonTotals();return MILESTONES.map(m=>{const cur=m.isPoints?t.pts:m.actions.reduce((s,id)=>s+(t.counts[id]||0),0);return{...m,current:cur,done:cur>=m.target};});}
+
+function showHome(){
+  loadState();
+  const totals=seasonTotals();
+  const played=state.gameLogs.length;
+  const remaining=Math.max(0,10-played);
+  document.getElementById('home-sub').textContent=remaining+' game'+(remaining!==1?'s':'')+' remaining';
+  document.getElementById('next-game-num').textContent=played+1;
+  document.getElementById('season-stats').innerHTML=`<div class="s-card"><div class="sn">${totals.pts}</div><div class="sl">total points</div></div><div class="s-card"><div class="sn">${played}</div><div class="sl">games played</div></div><div class="s-card"><div class="sn">${totals.counts['contribution']||0}</div><div class="sl">goals + assists</div></div><div class="s-card"><div class="sn">${totals.counts['interception']||0}</div><div class="sl">interceptions</div></div>`;
+  const mps=milestoneProgress();
+  document.getElementById('milestone-list').innerHTML=mps.map(m=>`<div class="m-row"><i class="ti ${m.done?'ti-circle-check':'ti-circle'}" style="font-size:17px;color:${m.done?'var(--green)':'var(--text3)'}"></i><span class="m-name">${m.name} <span class="m-reward">${m.reward}</span></span><span class="${m.done?'m-done':'m-prog'}">${Math.min(m.current,m.target)}/${m.target}</span></div>`).join('');
+  const gh=document.getElementById('game-history');
+  if(!played){gh.innerHTML='<p style="font-size:13px;color:var(--text3);padding:8px 0;">No games logged yet. Tap Start game to begin.</p>';}
+  else{gh.innerHTML=[...state.gameLogs].reverse().map((g,ri)=>{const i=state.gameLogs.length-ri;const syncBit=g.synced?'<i class="ti ti-circle-check" style="color:var(--green);font-size:14px"></i> synced':'<i class="ti ti-clock" style="color:var(--text3);font-size:14px"></i> pending';return`<div class="gh-item"><span>Game ${i}</span><span style="font-weight:600">${g.points} pts</span><span style="color:var(--text2);font-size:13px;">${syncBit}</span></div>`;}).join('');}
+  show('home');
+}
+
+function startGame(){
+  loadState();
+  state.currentCounts={};
+  ACTIONS.forEach(a=>state.currentCounts[a.id]=0);
+  const gNum=state.gameLogs.length+1;
+  document.getElementById('game-badge').textContent='Game '+gNum+' of 10';
+  document.getElementById('live-score').textContent='0 pts';
+  ['brain','engine','first','xfactor'].forEach(cat=>{
+    document.getElementById('btns-'+cat).innerHTML=ACTIONS.filter(a=>a.cat===cat).map(a=>`<div class="action-btn" id="btn-${a.id}" onclick="tap('${a.id}')"><div class="a-left"><i class="ti ${a.icon} a-icon"></i><div><div class="a-name">${a.name}</div><div class="a-sub">${a.sub}</div></div></div><div class="a-right"><span class="pts-badge p${a.pts}">+${a.pts}</span><div class="count-pill" id="pill-${a.id}">0</div></div></div>`).join('');
+  });
+  show('game');
+}
+
+function tap(id){
+  state.currentCounts[id]=(state.currentCounts[id]||0)+1;
+  const pill=document.getElementById('pill-'+id);
+  pill.textContent=state.currentCounts[id];pill.className='count-pill lit';
+  const total=calcPts();
+  document.getElementById('live-score').textContent=total+' pt'+(total!==1?'s':'');
+  const btn=document.getElementById('btn-'+id);
+  btn.classList.add('flashed');setTimeout(()=>btn.classList.remove('flashed'),300);
+}
+function calcPts(){return ACTIONS.reduce((s,a)=>s+(state.currentCounts[a.id]||0)*a.pts,0);}
+function confirmBack(){if(calcPts()>0&&!confirm("Go back? This game's stats will be lost."))return;showHome();}
+
+function endGame(){
+  const pts=calcPts();
+  const gNum=state.gameLogs.length+1;
+  state.gameLogs.push({gameNum:gNum,points:pts,counts:{...state.currentCounts},date:new Date().toLocaleDateString('en-CA'),synced:false});
+  saveState();showSummary();
+}
+
+function showSummary(){
+  const log=state.gameLogs[state.gameLogs.length-1];
+  document.getElementById('summary-badge').textContent='Game '+log.gameNum;
+  document.getElementById('sum-pts').textContent=log.points;
+  const rows=ACTIONS.filter(a=>(log.counts[a.id]||0)>0).map(a=>`<div class="sum-row"><span class="lbl">${a.name}</span><span class="val">${log.counts[a.id]}× = ${log.counts[a.id]*a.pts} pts</span></div>`).join('');
+  document.getElementById('sum-breakdown').innerHTML=rows||'<p style="font-size:13px;color:var(--text3);">No actions logged this game.</p>';
+  const mps=milestoneProgress();
+  document.getElementById('sum-milestones').innerHTML=mps.map(m=>`<div class="sum-row"><span class="lbl">${m.name}</span><span class="${m.done?'m-done':'val'}">${m.done?'Unlocked '+m.reward:Math.min(m.current,m.target)+'/'+m.target}</span></div>`).join('');
+  const btn=document.getElementById('sync-btn');
+  btn.disabled=false;btn.innerHTML='<i class="ti ti-table-export"></i> Sync to Google Sheets';
+  document.getElementById('sync-msg').textContent='';
+  show('summary');
+}
+
+async function syncToSheets(){
+  const log=state.gameLogs[state.gameLogs.length-1];
+  const btn=document.getElementById('sync-btn');
+  const msg=document.getElementById('sync-msg');
+  btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Syncing...';msg.textContent='';
+  const row=[log.date,'Game '+log.gameNum,log.counts.scan_play||0,log.counts.switch||0,log.counts.prog_pass||0,log.counts.box_delivery||0,log.counts.interception||0,log.counts.shutdown||0,log.counts.strike||0,log.counts.contribution||0,log.points];
+  try{
+    const res=await fetch(getWebhook(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({row})});
+    const json=await res.json();
+    if(json.result!=='success') throw new Error('Unexpected response from server');
+    log.synced=true;saveState();
+    msg.textContent='Synced! Row added to your Google Sheet.';msg.className='status-msg ok';
+    btn.innerHTML='<i class="ti ti-circle-check"></i> Synced';
+  }catch(e){
+    msg.textContent='Error: '+e.message;msg.className='status-msg err';
+    btn.disabled=false;btn.innerHTML='<i class="ti ti-refresh"></i> Retry sync';
+  }
+}
+
+loadState();
+showHome();
+</script>
+</body>
+</html>
