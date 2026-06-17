@@ -106,6 +106,11 @@
       <button class="secondary-btn" onclick="saveSetup()"><i class="ti ti-device-floppy"></i> Save custom URL</button>
       <p id="setup-msg" class="status-msg"></p>
     </div>
+    <div style="margin-top:1.5rem;padding-top:1.25rem;border-top:0.5px solid var(--border);">
+      <p style="font-size:12px;color:var(--text3);margin-bottom:0.75rem;">Danger zone</p>
+      <button class="secondary-btn" style="color:var(--red);border-color:var(--red);" onclick="resetAllData()"><i class="ti ti-trash"></i> Reset all game data</button>
+      <p id="reset-msg" class="status-msg"></p>
+    </div>
   </div>
 
   <div id="screen-home" class="screen">
@@ -191,7 +196,8 @@ function saveSetup(){
   setTimeout(()=>showHome(),800);
 }
 function skipSetup(){showHome();}
-function goSetup(){document.getElementById('webhook-url').value=localStorage.getItem('kyra_webhook')||'';document.getElementById('setup-msg').textContent='';show('setup');}
+function goSetup(){document.getElementById('webhook-url').value=localStorage.getItem('kyra_webhook')||'';document.getElementById('setup-msg').textContent='';document.getElementById('reset-msg').textContent='';show('setup');}
+function resetAllData(){if(!confirm('Delete all game data? This cannot be undone.')) return;state={gameLogs:[],currentCounts:{}};saveState();const m=document.getElementById('reset-msg');m.textContent='All game data cleared.';m.className='status-msg ok';setTimeout(()=>showHome(),1200);}
 
 function seasonTotals(){let pts=0,counts={};ACTIONS.forEach(a=>counts[a.id]=0);state.gameLogs.forEach(g=>{pts+=g.points;ACTIONS.forEach(a=>{counts[a.id]+=(g.counts[a.id]||0);});});return{pts,counts};}
 function milestoneProgress(){const t=seasonTotals();return MILESTONES.map(m=>{const cur=m.isPoints?t.pts:m.actions.reduce((s,id)=>s+(t.counts[id]||0),0);return{...m,current:cur,done:cur>=m.target};});}
