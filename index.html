@@ -269,9 +269,9 @@ async function syncToSheets(){
   const btn=document.getElementById('sync-btn');
   const msg=document.getElementById('sync-msg');
   btn.disabled=true;btn.innerHTML='<i class="ti ti-loader"></i> Syncing...';msg.textContent='';
-  const row=[log.date,'Game '+log.gameNum,log.counts.scan_play||0,log.counts.switch||0,log.counts.prog_pass||0,log.counts.box_delivery||0,log.counts.interception||0,log.counts.shutdown||0,log.counts.strike||0,log.counts.contribution||0,log.points];
+  const row=[log.date,'Game '+log.gameNum,log.counts.scan_play||0,log.counts.switch||0,log.counts.prog_pass||0,log.counts.box_delivery||0,log.counts.interception||0,log.counts.shutdown||0,log.counts.strike||0,log.counts.contribution||0,log.points];const mps=milestoneProgress();const milestones={interceptor:{current:mps[0].current,target:mps[0].target,done:mps[0].done},catalyst:{current:mps[1].current,target:mps[1].target,done:mps[1].done},general:{current:mps[2].current,target:mps[2].target,done:mps[2].done},century:{current:mps[3].current,target:mps[3].target,done:mps[3].done}};
   try{
-    const res=await fetch(getWebhook(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({row})});
+    const res=await fetch(getWebhook(),{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({row,milestones})});
     const json=await res.json();
     if(json.result!=='success') throw new Error('Unexpected response from server');
     log.synced=true;saveState();
